@@ -63,6 +63,13 @@ function resolve (name, spec, where, arg) {
   if (spec && (isFilespec.test(spec) || /^file:/i.test(spec))) {
     return fromFile(res, where)
   }
+  if (spec && spec.startsWith('npm:')) {
+    return Object.assign(npa(spec.substr(4), where), {
+      alias: name,
+      raw: res.raw,
+      rawSpec: res.rawSpec
+    })
+  }
   if (!HostedGit) HostedGit = require('hosted-git-info')
   const hosted = HostedGit.fromUrl(spec, {noGitPlus: true, noCommittish: true})
   if (hosted) {

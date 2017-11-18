@@ -59,6 +59,17 @@ require('tap').test('basic', function (t) {
       type: 'tag'
     },
 
+    'foo@npm:bar@1.2': {
+      alias: 'foo',
+      name: 'bar',
+      escapedName: 'bar',
+      type: 'range',
+      saveSpec: null,
+      fetchSpec: '1.2',
+      raw: 'foo@npm:bar@1.2',
+      rawSpec: 'npm:bar@1.2'
+    },
+
     '@f fo o al/ a d s ;f': {
       raw: '@f fo o al/ a d s ;f',
       name: null,
