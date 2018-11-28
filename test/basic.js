@@ -1,6 +1,6 @@
 var npa = require('../npa.js')
 var path = require('path')
-var osenv = require('osenv')
+var os = require('os')
 
 require('tap').test('basic', function (t) {
   t.setMaxListeners(999)
@@ -330,7 +330,7 @@ require('tap').test('basic', function (t) {
       escapedName: null,
       type: 'directory',
       saveSpec: 'file:~/path/to/foo',
-      fetchSpec: osenv.home().replace(/\\/g, '/') + '/path/to/foo',
+      fetchSpec: os.homedir().replace(/\\/g, '/') + '/path/to/foo',
       raw: 'file:~/path/to/foo'
     },
 
@@ -339,7 +339,7 @@ require('tap').test('basic', function (t) {
       escapedName: null,
       type: 'directory',
       saveSpec: 'file:~/path/to/foo',
-      fetchSpec: osenv.home().replace(/\\/g, '/') + '/path/to/foo',
+      fetchSpec: os.homedir().replace(/\\/g, '/') + '/path/to/foo',
       raw: 'file:/~/path/to/foo'
     },
 

@@ -8,7 +8,7 @@ let HostedGit
 let semver
 let path
 let validatePackageName
-let osenv
+let os
 
 const isWindows = process.platform === 'win32' || global.FAKE_WINDOWS
 const hasSlashes = isWindows ? /\\|[/]/ : /[/]/
@@ -177,8 +177,8 @@ function fromFile (res, where) {
     .replace(/^file:(?:[/]*([~./]))?/, '$1')
   if (/^~[/]/.test(spec)) {
     // this is needed for windows and for file:~/foo/bar
-    if (!osenv) osenv = require('osenv')
-    res.fetchSpec = resolvePath(osenv.home(), spec.slice(2))
+    if (!os) os = require('os')
+    res.fetchSpec = resolvePath(os.homedir(), spec.slice(2))
     res.saveSpec = 'file:' + spec
   } else {
     res.fetchSpec = resolvePath(where, spec)
