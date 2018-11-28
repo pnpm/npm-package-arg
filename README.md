@@ -1,6 +1,4 @@
-# npm-package-arg
-
-[![Build Status](https://travis-ci.org/npm/npm-package-arg.svg?branch=master)](https://travis-ci.org/npm/npm-package-arg)
+# @zkochan/npm-package-arg
 
 Parses package name and specifier passed to commands like `npm install` or
 `npm cache add`, or as found in `package.json` dependency sections.
@@ -9,7 +7,7 @@ Parses package name and specifier passed to commands like `npm install` or
 
 ```javascript
 var assert = require("assert")
-var npa = require("npm-package-arg")
+var npa = require("@zkochan/npm-package-arg")
 
 // Pass in the descriptor, and it'll return an object
 try {
@@ -21,7 +19,7 @@ try {
 
 ## USING
 
-`var npa = require('npm-package-arg')`
+`var npa = require('@zkochan/npm-package-arg')`
 
 ### var result = npa(*arg*[, *where*])
 
@@ -47,7 +45,7 @@ included then the default is `latest`.
 
 ## RESULT OBJECT
 
-The objects that are returned by npm-package-arg contain the following
+The objects that are returned by @zkochan/npm-package-arg contain the following
 keys:
 
 * `type` - One of the following strings:

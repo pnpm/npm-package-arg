@@ -1,6 +1,6 @@
 {
-  "name": "npm-package-arg",
-  "version": "6.0.0",
+  "name": "@zkochan/npm-package-arg",
+  "version": "1.0.0",
   "description": "Parse the things that can be arguments to `npm install`",
   "main": "npa.js",
   "directories": {
@@ -23,12 +23,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/npm/npm-package-arg"
+    "url": "https://github.com/zkochan/npm-package-arg"
   },
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/npm/npm-package-arg/issues"
+    "url": "https://github.com/zkochan/npm-package-arg/issues"
   },
-  "homepage": "https://github.com/npm/npm-package-arg"
+  "homepage": "https://github.com/zkochan/npm-package-arg"
 }
