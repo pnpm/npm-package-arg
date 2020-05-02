@@ -10,13 +10,13 @@
     "npa.js"
   ],
   "dependencies": {
-    "hosted-git-info": "^2.5.0",
-    "semver": "^6.0.0",
+    "hosted-git-info": "^3.0.4",
+    "semver": "^7.3.2",
     "validate-npm-package-name": "^3.0.0"
   },
   "devDependencies": {
-    "standard": "9.0.2",
-    "tap": "^10.3.0"
+    "standard": "14.3.3",
+    "tap": "^14.10.7"
   },
   "scripts": {
     "test": "standard && tap -J --coverage test/*.js"

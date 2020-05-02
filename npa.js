@@ -71,7 +71,7 @@ function resolve (name, spec, where, arg) {
     })
   }
   if (!HostedGit) HostedGit = require('hosted-git-info')
-  const hosted = HostedGit.fromUrl(spec, {noGitPlus: true, noCommittish: true})
+  const hosted = HostedGit.fromUrl(spec, { noGitPlus: true, noCommittish: true })
   if (hosted) {
     return fromHostedGit(res, hosted)
   } else if (spec && isURL.test(spec)) {
@@ -195,7 +195,7 @@ function fromFile (res, where) {
 function fromHostedGit (res, hosted) {
   res.type = 'git'
   res.hosted = hosted
-  res.saveSpec = hosted.toString({noGitPlus: false, noCommittish: false})
+  res.saveSpec = hosted.toString({ noGitPlus: false, noCommittish: false })
   res.fetchSpec = hosted.getDefaultRepresentation() === 'shortcut' ? null : hosted.toString()
   return setGitCommittish(res, hosted.committish)
 }
@@ -224,7 +224,7 @@ function matchGitScp (spec) {
 
 function fromURL (res) {
   if (!url) url = require('url')
-  const urlparse = url.parse(res.rawSpec)
+  const urlparse = url.parse(res.rawSpec) // eslint-disable-line
   res.saveSpec = res.rawSpec
   // check the protocol, and then see if it's git or not
   switch (urlparse.protocol) {
@@ -234,7 +234,7 @@ function fromURL (res) {
     case 'git+rsync:':
     case 'git+ftp:':
     case 'git+file:':
-    case 'git+ssh:':
+    case 'git+ssh:': {
       res.type = 'git'
       const match = urlparse.protocol === 'git+ssh:' && matchGitScp(res.rawSpec)
       if (match) {
@@ -247,6 +247,7 @@ function fromURL (res) {
         res.fetchSpec = url.format(urlparse)
       }
       break
+    }
     case 'http:':
     case 'https:':
       res.type = 'remote'
