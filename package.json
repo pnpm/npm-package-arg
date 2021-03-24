@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "standard": "14.3.3",
-    "tap": "^14.10.7"
+    "tap": "^14.11.0"
   },
   "scripts": {
     "test": "standard && tap -J --coverage test/*.js"
