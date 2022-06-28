@@ -15,11 +15,11 @@
   "dependencies": {
     "hosted-git-info": "^4.0.1",
     "semver": "^7.3.5",
-    "validate-npm-package-name": "^3.0.0"
+    "validate-npm-package-name": "^4.0.0"
   },
   "devDependencies": {
     "standard": "14.3.3",
-    "tap": "^14.11.0"
+    "tap": "^16.3.0"
   },
   "scripts": {
     "test": "standard && tap -J --coverage test/*.js"
