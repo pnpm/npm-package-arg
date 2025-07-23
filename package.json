@@ -4,7 +4,7 @@
   "description": "Parse the things that can be arguments to `npm install`",
   "main": "npa.js",
   "engines": {
-    "node": ">=14.6"
+    "node": ">=18.12"
   },
   "directories": {
     "test": "test"

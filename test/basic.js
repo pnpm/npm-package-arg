@@ -2,6 +2,13 @@ var npa = require('../npa.js')
 var path = require('path')
 var os = require('os')
 
+const normalizePath = p => p && p.replace(/^[a-zA-Z]:/, '').replace(/\\/g, '/')
+const normalizePaths = spec => {
+  spec.saveSpec = normalizePath(spec.saveSpec)
+  spec.fetchSpec = normalizePath(spec.fetchSpec)
+  return spec
+}
+
 require('tap').test('basic', function (t) {
   t.setMaxListeners(999)
 
@@ -423,12 +430,14 @@ require('tap').test('basic', function (t) {
   }
 
   Object.keys(tests).forEach(function (arg) {
-    var res = npa(arg, '/test/a/b')
-    t.ok(res instanceof npa.Result, arg + ' is a result')
-    Object.keys(tests[arg]).forEach(function (key) {
-      t.has(res[key], tests[arg][key], arg + ' [' + key + ']')
+    t.test(arg, t => {
+      const res = normalizePaths(npa(arg, '/test/a/b'))
+      t.ok(res instanceof npa.Result, arg + ' is a result')
+      Object.keys(tests[arg]).forEach(function (key) {
+        t.match(res[key], tests[arg][key], arg + ' [' + key + ']')
+      })
+      t.end()
     })
-    //    t.has(res, tests[arg], arg + ' matches expectations')
   })
 
   var objSpec = { name: 'foo', rawSpec: '1.2.3' }
