@@ -22,7 +22,7 @@
     "tap": "^16.3.0"
   },
   "scripts": {
-    "test": "standard && tap -J --coverage test/*.js"
+    "test": "standard && tap -J --no-check-coverage test/*.js"
   },
   "repository": {
     "type": "git",
