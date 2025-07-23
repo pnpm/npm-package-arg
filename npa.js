@@ -3,7 +3,6 @@ module.exports = npa
 module.exports.resolve = resolve
 module.exports.Result = Result
 
-let url
 let HostedGit
 let semver
 let path
@@ -143,14 +142,47 @@ Result.prototype.toJSON = function () {
   return result
 }
 
-function setGitCommittish (res, committish) {
-  if (committish != null && committish.length >= 7 && committish.slice(0, 7) === 'semver:') {
-    res.gitRange = decodeURIComponent(committish.slice(7))
+// sets res.gitCommittish, res.gitRange, and res.gitSubdir
+function setGitAttrs (res, committish) {
+  if (!committish) {
     res.gitCommittish = null
-  } else {
-    res.gitCommittish = committish === '' ? null : committish
+    return
   }
-  return res
+
+  // for each :: separated item:
+  for (const part of committish.split('::')) {
+    // if the item has no : the n it is a commit-ish
+    if (!part.includes(':')) {
+      if (res.gitRange) {
+        throw new Error('cannot override existing semver range with a committish')
+      }
+      if (res.gitCommittish) {
+        throw new Error('cannot override existing committish with a second committish')
+      }
+      res.gitCommittish = part
+      continue
+    }
+    // split on name:value
+    const [name, value] = part.split(':')
+    // if name is semver do semver lookup of ref or tag
+    if (name === 'semver') {
+      if (res.gitCommittish) {
+        throw new Error('cannot override existing committish with a semver range')
+      }
+      if (res.gitRange) {
+        throw new Error('cannot override existing semver range with a second semver range')
+      }
+      res.gitRange = decodeURIComponent(value)
+      continue
+    }
+    if (name === 'path') {
+      if (res.gitSubdir) {
+        throw new Error('cannot override existing path with a second path')
+      }
+      res.gitSubdir = `/${value}`
+      continue
+    }
+  }
 }
 
 const isAbsolutePath = /^[/]|^[A-Za-z]:/
@@ -197,7 +229,8 @@ function fromHostedGit (res, hosted) {
   res.hosted = hosted
   res.saveSpec = hosted.toString({ noGitPlus: false, noCommittish: false })
   res.fetchSpec = hosted.getDefaultRepresentation() === 'shortcut' ? null : hosted.toString()
-  return setGitCommittish(res, hosted.committish)
+  setGitAttrs(res, hosted.committish)
+  return res
 }
 
 function unsupportedURLType (protocol, spec) {
@@ -206,48 +239,51 @@ function unsupportedURLType (protocol, spec) {
   return err
 }
 
-function matchGitScp (spec) {
-  // git ssh specifiers are overloaded to also use scp-style git
-  // specifiers, so we have to parse those out and treat them special.
-  // They are NOT true URIs, so we can't hand them to `url.parse`.
-  //
-  // This regex looks for things that look like:
-  // git+ssh://git@my.custom.git.com:username/project.git#deadbeef
-  //
-  // ...and various combinations. The username in the beginning is *required*.
-  const matched = spec.match(/^git\+ssh:\/\/([^:#]+:[^#]+(?:\.git)?)(?:#(.*))?$/i)
-  return matched && !matched[1].match(/:[0-9]+\/?.*$/i) && {
-    fetchSpec: matched[1],
-    gitCommittish: matched[2] == null ? null : matched[2]
-  }
-}
-
 function fromURL (res) {
-  if (!url) url = require('url')
-  const urlparse = url.parse(res.rawSpec) // eslint-disable-line
-  res.saveSpec = res.rawSpec
+  let rawSpec = res.rawSpec
+  res.saveSpec = rawSpec
+  if (rawSpec.startsWith('git+ssh:')) {
+    // git ssh specifiers are overloaded to also use scp-style git
+    // specifiers, so we have to parse those out and treat them special.
+    // They are NOT true URIs, so we can't hand them to URL.
+
+    // This regex looks for things that look like:
+    // git+ssh://git@my.custom.git.com:username/project.git#deadbeef
+    // ...and various combinations. The username in the beginning is *required*.
+    const matched = rawSpec.match(/^git\+ssh:\/\/([^:#]+:[^#]+(?:\.git)?)(?:#(.*))?$/i)
+    if (matched && !matched[1].match(/:[0-9]+\/?.*$/i)) {
+      res.type = 'git'
+      setGitAttrs(res, matched[2])
+      res.fetchSpec = matched[1]
+      return res
+    }
+  } else if (rawSpec.startsWith('git+file://')) {
+    // URL can't handle windows paths
+    rawSpec = rawSpec.replace(/\\/g, '/')
+  }
+  const parsedUrl = new URL(rawSpec)
   // check the protocol, and then see if it's git or not
-  switch (urlparse.protocol) {
+  switch (parsedUrl.protocol) {
     case 'git:':
     case 'git+http:':
     case 'git+https:':
     case 'git+rsync:':
     case 'git+ftp:':
     case 'git+file:':
-    case 'git+ssh:': {
+    case 'git+ssh:':
       res.type = 'git'
-      const match = urlparse.protocol === 'git+ssh:' && matchGitScp(res.rawSpec)
-      if (match) {
-        res.fetchSpec = match.fetchSpec
-        res.gitCommittish = match.gitCommittish
+      setGitAttrs(res, parsedUrl.hash.slice(1))
+      if (parsedUrl.protocol === 'git+file:' && /^git\+file:\/\/[a-z]:/i.test(rawSpec)) {
+        // URL can't handle drive letters on windows file paths, the host can't contain a :
+        res.fetchSpec = `git+file://${parsedUrl.host.toLowerCase()}:${parsedUrl.pathname}`
       } else {
-        setGitCommittish(res, urlparse.hash != null ? urlparse.hash.slice(1) : '')
-        urlparse.protocol = urlparse.protocol.replace(/^git[+]/, '')
-        delete urlparse.hash
-        res.fetchSpec = url.format(urlparse)
+        parsedUrl.hash = ''
+        res.fetchSpec = parsedUrl.toString()
+      }
+      if (res.fetchSpec.startsWith('git+')) {
+        res.fetchSpec = res.fetchSpec.slice(4)
       }
       break
-    }
     case 'http:':
     case 'https:':
       res.type = 'remote'
@@ -255,7 +291,7 @@ function fromURL (res) {
       break
 
     default:
-      throw unsupportedURLType(urlparse.protocol, res.rawSpec)
+      throw unsupportedURLType(parsedUrl.protocol, rawSpec)
   }
 
   return res
